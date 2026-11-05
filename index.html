@@ -1019,7 +1019,9 @@ function renderDay(){
   const notes = teamNotes.get(k) || [];
   const order = {early:0, time:1, in:2, work:3, late:4};
   let cards = '', total = 0;
-  for (const [t, list] of teams){
+  // Sales goes last: it's a single person, so it sits better at the end of the page
+  const last = t => /^sales/i.test(t) ? 1 : 0;
+  for (const [t, list] of [...teams].sort((a, b) => last(a[0]) - last(b[0]))){
     const work = list.filter(e => isWork(kind(e.value)));
     const away = list.filter(e => e.value && !isWork(kind(e.value)));
     const tn = notes.filter(n => n.team === t);
