@@ -3,341 +3,497 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f766e">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rota">
 <title>Club Rota</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* ===== Settings: the Google Sheet this page reads ===== */
+  /* Layout: iOS-style grouped screens. Frosted bar on top, large titles, inset grouped lists,
+     a segmented control on wide screens and a tab bar at the bottom on phones. */
   :root{
-    --bg:#f5f7f8; --surface:#ffffff; --surface-2:#eef2f3; --border:#dfe5e7;
-    --text:#14202b; --muted:#64737f; --accent:#0f766e; --accent-soft:#d5f0ec; --me:#e8edff; --me-line:#4f63d2;
-    --today:#fff6d6; --today-line:#f0b400; --weekend:#f7f9fa;
-    --early:#dbeafe; --early-t:#1e40af;
-    --late:#ede9fe;  --late-t:#5b21b6;
-    --in:#dcfce7;    --in-t:#166534;
-    --time:#e0f2fe;  --time-t:#075985;
-    --work:#fef3c7;  --work-t:#92400e;
-    --leave:#fce7f3; --leave-t:#9d174d;
-    --off:#f1f5f9;   --off-t:#64748b;
-    --sick:#fee2e2;  --sick-t:#b91c1c;
-    --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.05);
+    --bg:#f2f2f7; --surface:#ffffff; --surface-2:#f7f7fa; --fill:rgba(118,118,128,.12); --fill-2:rgba(118,118,128,.2);
+    --sep:rgba(60,60,67,.16); --text:#000000; --muted:rgba(60,60,67,.62); --faint:rgba(60,60,67,.32);
+    --accent:#007aff; --accent-soft:rgba(0,122,255,.1); --red:#ff3b30; --dot:#ff9500;
+    --me:rgba(0,122,255,.07); --today-col:rgba(255,59,48,.045); --weekend:rgba(118,118,128,.045);
+    --bar:rgba(249,249,251,.78); --shadow:0 1px 0 rgba(0,0,0,.02);
+    /* shift colours (iOS system palette), text shades kept dark enough to read on their tint */
+    --c-early:#007aff; --t-early:#0062cc;
+    --c-late:#ff9500;  --t-late:#b35c00;
+    --c-in:#34c759;    --t-in:#1f7a37;
+    --c-time:#30b0c7;  --t-time:#0f6f80;
+    --c-work:#a2845e;  --t-work:#7a5f3d;
+    --c-leave:#ff2d55; --t-leave:#c8103a;
+    --c-off:#8e8e93;   --t-off:#636366;
+    --c-sick:#ff3b30;  --t-sick:#c4180d;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, "Segoe UI", Roboto, sans-serif;
+    --r-lg:16px; --r:12px; --r-sm:10px;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#0d1417; --surface:#151f23; --surface-2:#1c282d; --border:#2a383e;
-      --text:#e6edf0; --muted:#93a3ab; --accent:#2dd4bf; --accent-soft:#123b37; --me:#1d2445; --me-line:#8b9cff;
-      --today:#3a3214; --today-line:#f0b400; --weekend:#121b1f;
-      --early:#1e2f4f; --early-t:#93c5fd; --late:#2e2650; --late-t:#c4b5fd;
-      --in:#173a26; --in-t:#86efac; --time:#123247; --time-t:#7dd3fc;
-      --work:#3b2f12; --work-t:#fcd34d; --leave:#45182f; --leave-t:#f9a8d4;
-      --off:#1e293b; --off-t:#94a3b8; --sick:#4a1a1a; --sick-t:#fca5a5;
-      --shadow:none;
+      --bg:#000000; --surface:#1c1c1e; --surface-2:#242426; --fill:rgba(118,118,128,.24); --fill-2:rgba(118,118,128,.32);
+      --sep:rgba(84,84,88,.6); --text:#ffffff; --muted:rgba(235,235,245,.6); --faint:rgba(235,235,245,.3);
+      --accent:#0a84ff; --accent-soft:rgba(10,132,255,.18); --red:#ff453a; --dot:#ff9f0a;
+      --me:rgba(10,132,255,.16); --today-col:rgba(255,69,58,.09); --weekend:rgba(118,118,128,.08);
+      --bar:rgba(22,22,24,.78); --shadow:none;
+      --c-early:#0a84ff; --t-early:#64aaff; --c-late:#ff9f0a; --t-late:#ffb340;
+      --c-in:#30d158; --t-in:#4fdc74; --c-time:#40c8e0; --t-time:#6fd8ea;
+      --c-work:#ac8e68; --t-work:#cbb08a; --c-leave:#ff375f; --t-leave:#ff6b88;
+      --c-off:#98989d; --t-off:#aeaeb2; --c-sick:#ff453a; --t-sick:#ff7a70;
+      color-scheme: dark;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#0d1417; --surface:#151f23; --surface-2:#1c282d; --border:#2a383e;
-    --text:#e6edf0; --muted:#93a3ab; --accent:#2dd4bf; --accent-soft:#123b37; --me:#1d2445; --me-line:#8b9cff;
-    --today:#3a3214; --today-line:#f0b400; --weekend:#121b1f;
-    --early:#1e2f4f; --early-t:#93c5fd; --late:#2e2650; --late-t:#c4b5fd;
-    --in:#173a26; --in-t:#86efac; --time:#123247; --time-t:#7dd3fc;
-    --work:#3b2f12; --work-t:#fcd34d; --leave:#45182f; --leave-t:#f9a8d4;
-    --off:#1e293b; --off-t:#94a3b8; --sick:#4a1a1a; --sick-t:#fca5a5;
-    --shadow:none;
+    --bg:#000000; --surface:#1c1c1e; --surface-2:#242426; --fill:rgba(118,118,128,.24); --fill-2:rgba(118,118,128,.32);
+    --sep:rgba(84,84,88,.6); --text:#ffffff; --muted:rgba(235,235,245,.6); --faint:rgba(235,235,245,.3);
+    --accent:#0a84ff; --accent-soft:rgba(10,132,255,.18); --red:#ff453a; --dot:#ff9f0a;
+    --me:rgba(10,132,255,.16); --today-col:rgba(255,69,58,.09); --weekend:rgba(118,118,128,.08);
+    --bar:rgba(22,22,24,.78); --shadow:none;
+    --c-early:#0a84ff; --t-early:#64aaff; --c-late:#ff9f0a; --t-late:#ffb340;
+    --c-in:#30d158; --t-in:#4fdc74; --c-time:#40c8e0; --t-time:#6fd8ea;
+    --c-work:#ac8e68; --t-work:#cbb08a; --c-leave:#ff375f; --t-leave:#ff6b88;
+    --c-off:#98989d; --t-off:#aeaeb2; --c-sick:#ff453a; --t-sick:#ff7a70;
+    color-scheme: dark;
   }
+
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{background:var(--bg);color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-  button,select,input{font:inherit;color:inherit}
-  .wrap{max-width:1200px;margin:0 auto;padding:0 16px}
-
-  header{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border)}
-  .bar{display:flex;align-items:center;gap:12px;height:56px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
-  .logo{width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:14px}
+  body{background:var(--bg);color:var(--text);font:400 16px/1.4 var(--font);letter-spacing:-.011em;
+    -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;font-variant-numeric:tabular-nums}
+  button,select,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+  button{cursor:pointer}
+  .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .hidden{display:none!important}
   .spacer{flex:1}
-  .status{font-size:12px;color:var(--muted);white-space:nowrap}
-  .icon-btn{border:1px solid var(--border);background:var(--surface);border-radius:10px;height:36px;min-width:36px;padding:0 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-  .icon-btn:hover{background:var(--surface-2)}
-  .spin{animation:spin 1s linear infinite}
+  .muted{color:var(--muted)}
+  :focus-visible{outline:3px solid var(--accent-soft);outline-offset:2px;border-radius:8px}
+
+  /* ---------- buttons: one tinted style, one filled style ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border:0;border-radius:999px;
+    background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:15px;white-space:nowrap;
+    transition:transform .12s ease, background-color .15s ease, opacity .15s ease}
+  .btn:hover{background:color-mix(in srgb,var(--accent) 16%,transparent)}
+  .btn:active{transform:scale(.96)}
+  .btn:disabled{opacity:.35;cursor:default;transform:none}
+  .btn svg{width:17px;height:17px}
+  .btn.icon{width:36px;padding:0}
+  .btn.plain{background:transparent}
+  .btn.plain:hover{background:var(--fill)}
+  .btn-fill{height:50px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-weight:600;font-size:17px;
+    transition:transform .12s ease, filter .15s ease}
+  .btn-fill:hover{filter:brightness(1.06)}
+  .btn-fill:active{transform:scale(.98)}
+
+  /* ---------- top bar ---------- */
+  header{position:sticky;top:0;z-index:30;padding-top:env(safe-area-inset-top,0px);background:var(--bar);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--sep)}
+  .bar{display:flex;align-items:center;gap:10px;height:52px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em}
+  .app-icon{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;
+    background:linear-gradient(160deg,#3d9bff,#0062e6);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.25)}
+  .status{font-size:13px;color:var(--muted);white-space:nowrap;margin-right:4px}
+  .spin{animation:spin .9s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  nav.tabs{display:flex;gap:4px}
-  nav.tabs button{border:0;background:none;padding:10px 14px;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-weight:600}
-  nav.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+  .segmented{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:2px;border-radius:9px;background:var(--fill);margin:0 auto 10px}
+  .segmented button{border:0;background:transparent;height:30px;padding:0 22px;border-radius:7px;font-size:14px;font-weight:500;color:var(--text);
+    transition:background-color .2s ease, box-shadow .2s ease}
+  .segmented button[aria-selected="true"]{background:var(--surface);font-weight:600;box-shadow:0 3px 8px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04)}
+  :root[data-theme="dark"] .segmented button[aria-selected="true"]{background:#636366}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .segmented button[aria-selected="true"]{background:#636366} }
+  .seg-row{display:flex;justify-content:center}
 
-  main{padding:20px 0 60px}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
-  .muted{color:var(--muted)}
-  h2{font-size:20px;margin:0 0 4px}
-  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  select,input[type=search]{height:40px;border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:0 12px;min-width:0}
-  select:focus,input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  /* bottom tab bar (phones) */
+  .tabbar{display:none}
 
-  /* chips */
-  .chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--work);color:var(--work-t)}
-  .k-early{background:var(--early);color:var(--early-t)}
-  .k-late{background:var(--late);color:var(--late-t)}
-  .k-in{background:var(--in);color:var(--in-t)}
-  .k-time{background:var(--time);color:var(--time-t)}
-  .k-work{background:var(--work);color:var(--work-t)}
-  .k-leave{background:var(--leave);color:var(--leave-t)}
-  .k-off{background:var(--off);color:var(--off-t)}
-  .k-sick{background:var(--sick);color:var(--sick-t)}
+  /* ---------- page ---------- */
+  main{padding:8px 0 56px}
+  .large-title{margin:18px 0 14px}
+  .eyebrow{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.02em}
+  h1{font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.03em;margin:2px 0 0;text-wrap:balance}
+  .subtitle{color:var(--muted);font-size:15px;margin-top:4px}
+  .section-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 4px 7px;
+    font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.02em}
+  .group{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+  .row{display:flex;align-items:center;gap:12px;min-height:48px;padding:10px 16px;position:relative}
+  .group > .row + .row::before,.group .rows > .row + .row::before{content:"";position:absolute;top:0;right:0;left:16px;border-top:.5px solid var(--sep)}
+  .row.tap{cursor:pointer;transition:background-color .15s ease}
+  .row.tap:hover{background:var(--surface-2)}
+  .row.tap:active{background:var(--fill)}
+  .chev{width:8px;height:13px;color:var(--faint);flex:none}
+  .empty{padding:34px 20px;text-align:center;color:var(--muted)}
+  .banner{margin:14px 0 0;padding:12px 16px;border-radius:var(--r);background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--t-sick);font-size:15px}
 
-  /* ===== My shifts ===== */
-  .me-head{padding:18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-  .me-head select{flex:1;min-width:200px;max-width:340px}
-  .hero{margin-top:16px;padding:20px;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:linear-gradient(135deg,var(--accent),#115e59);color:#fff;border:0}
-  .hero .date-tile{background:rgba(255,255,255,.15);border-radius:12px;width:72px;text-align:center;padding:8px 0}
-  .hero .date-tile .d{font-size:28px;font-weight:700;line-height:1}
-  .hero .date-tile .m{font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.9}
-  .hero .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;opacity:.85}
-  .hero .when{font-size:20px;font-weight:700}
-  .hero .what{font-size:15px;opacity:.95;margin-top:2px}
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-  .stat{padding:12px 14px}
-  .stat .n{font-size:22px;font-weight:700}
-  .stat .t{font-size:12px;color:var(--muted)}
-  .list-tools{display:flex;justify-content:space-between;align-items:center;margin:22px 0 8px;gap:10px;flex-wrap:wrap}
-  .week{margin-bottom:14px;overflow:hidden}
-  .week-h{padding:10px 16px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:var(--surface-2);border-bottom:1px solid var(--border)}
-  .day{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
-  .day:last-child{border-bottom:0}
-  .day .dn{text-align:center;line-height:1.1}
-  .day .dn b{display:block;font-size:20px}
-  .day .dn span{font-size:11px;color:var(--muted);text-transform:uppercase}
-  .day.is-today{background:var(--today);box-shadow:inset 3px 0 0 var(--today-line)}
-  .day.rest{opacity:.65}
-  .day .note{font-size:12px;color:var(--muted);margin-top:2px}
-  .rel{font-size:12px;color:var(--muted);white-space:nowrap}
+  select,.field{height:36px;border:0;border-radius:var(--r-sm);background:var(--fill);padding:0 12px;min-width:0;font-size:15px}
+  select{appearance:none;-webkit-appearance:none;padding-right:30px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 11px center}
+  .search{position:relative;display:flex;align-items:center;flex:1;min-width:150px;max-width:280px}
+  .search svg{position:absolute;left:10px;width:15px;height:15px;color:var(--muted);pointer-events:none}
+  .search input{width:100%;height:36px;border:0;border-radius:var(--r-sm);background:var(--fill);padding:0 12px 0 32px;font-size:15px}
+  .search input::placeholder{color:var(--muted)}
 
-  /* ===== Full rota ===== */
-  .rota-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-  .months{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
-  .months button{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap;font-weight:500}
-  .months button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
-  .months button.cur:not([aria-pressed="true"]){border-color:var(--accent);color:var(--accent)}
-  .table-wrap{overflow:auto;max-height:calc(100vh - 230px);border-radius:14px}
+  /* iOS switch */
+  .switch{display:inline-flex;align-items:center;gap:10px;font-size:15px;color:var(--text);text-transform:none;letter-spacing:-.011em;cursor:pointer;user-select:none}
+  .switch input{appearance:none;-webkit-appearance:none;width:51px;height:31px;border-radius:999px;background:var(--fill-2);position:relative;margin:0;cursor:pointer;transition:background-color .2s ease}
+  .switch input::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.16);transition:transform .22s cubic-bezier(.3,.7,.4,1)}
+  .switch input:checked{background:#34c759}
+  .switch input:checked::after{transform:translateX(20px)}
 
-  /* ===== Full-screen rota: just the grid, filling the screen ===== */
+  /* ---------- chips ---------- */
+  .chip{--c:var(--c-work);--t:var(--t-work);display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:7px;
+    font-size:13px;font-weight:600;white-space:nowrap;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--t)}
+  .k-early{--c:var(--c-early);--t:var(--t-early)} .k-late{--c:var(--c-late);--t:var(--t-late)}
+  .k-in{--c:var(--c-in);--t:var(--t-in)} .k-time{--c:var(--c-time);--t:var(--t-time)}
+  .k-work{--c:var(--c-work);--t:var(--t-work)} .k-leave{--c:var(--c-leave);--t:var(--t-leave)}
+  .k-off{--c:var(--c-off);--t:var(--t-off)} .k-sick{--c:var(--c-sick);--t:var(--t-sick)}
+
+  /* ---------- My shifts ---------- */
+  .picker .row select{margin-left:auto;max-width:60%}
+  .picker .row .label{font-size:16px}
+  .next{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;padding:18px}
+  .cal{width:64px;height:68px;border-radius:14px;background:var(--surface-2);box-shadow:inset 0 0 0 .5px var(--sep);
+    display:grid;grid-template-rows:auto 1fr;text-align:center;overflow:hidden}
+  .cal .w{font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.04em;padding-top:7px}
+  .cal .d{font-size:30px;font-weight:300;letter-spacing:-.03em;line-height:1.15}
+  .next .when{font-size:13px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.02em}
+  .next .what{font-size:22px;font-weight:700;letter-spacing:-.025em;margin-top:1px}
+  .next .date{color:var(--muted);font-size:15px;margin-top:1px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px}
+  .stat{padding:13px 16px;position:relative}
+  .stat + .stat::before{content:"";position:absolute;left:0;top:14px;bottom:14px;border-left:.5px solid var(--sep)}
+  .stat .n{font-size:24px;font-weight:700;letter-spacing:-.03em}
+  .stat .t{font-size:13px;color:var(--muted)}
+  .day{min-height:60px}
+  .day .dn{width:40px;flex:none;text-align:center;line-height:1.1}
+  .day .dn span{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .day .dn b{display:inline-grid;place-items:center;min-width:30px;height:30px;margin-top:2px;font-size:19px;font-weight:600;border-radius:50%}
+  .day.is-today .dn b{background:var(--red);color:#fff}
+  .day .body{flex:1;min-width:0}
+  .day .desc{font-size:14px;color:var(--muted);margin-top:3px}
+  .day .note{font-size:14px;color:var(--muted);margin-top:3px}
+  .day.rest .dn b,.day.rest .body{opacity:.55}
+  .rel{font-size:14px;color:var(--muted);white-space:nowrap}
+  .shift-note{display:flex;gap:6px;align-items:baseline;font-size:14px;color:var(--text);margin-top:4px;white-space:normal}
+  .shift-note::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--dot);transform:translateY(-1px)}
+  .foot{font-size:13px;color:var(--muted);margin:12px 4px 0}
+
+  /* ---------- Who's in ---------- */
+  .day-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-2px 0 4px}
+  .day-nav .date-field{height:36px;border:0;border-radius:var(--r-sm);background:var(--fill);padding:0 10px;font-size:15px}
+  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-items:start;margin-top:12px}
+  .team-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px}
+  .team-h h3{margin:0;font-size:17px;font-weight:600;letter-spacing:-.02em}
+  .count{font-size:13px;font-weight:600;color:var(--muted);background:var(--fill);border-radius:999px;padding:2px 9px}
+  .tnote{margin:0 16px 8px;padding:8px 10px;border-radius:var(--r-sm);background:var(--fill);font-size:14px;color:var(--muted)}
+  .person{min-height:52px}
+  .avatar{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:600;color:#fff;
+    background:linear-gradient(180deg,#a5a5aa,#86868b)}
+  .person .who{flex:1;min-width:0}
+  .person .who b{font-weight:500}
+  .person .who .shift-note{font-size:13px;color:var(--muted);margin-top:1px}
+  .person.away{opacity:.5}
+
+  /* ---------- Full rota ---------- */
+  .months{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;margin:0 -2px;scrollbar-width:none}
+  .months::-webkit-scrollbar{display:none}
+  .months button{flex:none;height:32px;border:0;border-radius:999px;padding:0 14px;background:var(--fill);font-size:14px;font-weight:500;
+    transition:background-color .15s ease, transform .12s ease}
+  .months button:hover{background:var(--fill-2)}
+  .months button:active{transform:scale(.96)}
+  .months button[aria-pressed="true"]{background:var(--text);color:var(--bg);font-weight:600}
+  .months button.cur:not([aria-pressed="true"]){color:var(--red);font-weight:600}
+  .rota-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0 12px}
+  .table-wrap{overflow:auto;max-height:calc(100vh - 290px);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow);overscroll-behavior:contain}
+  table.rota{border-collapse:separate;border-spacing:0;font-size:13px;min-width:100%}
+  .rota th,.rota td{border-bottom:.5px solid var(--sep);padding:7px 5px;text-align:center;white-space:nowrap;background:var(--surface);height:44px}
+  .rota td + td,.rota th + th{box-shadow:inset .5px 0 0 var(--sep)}
+  .rota thead th{position:sticky;top:0;z-index:3;font-weight:500;min-width:62px;height:56px;background:var(--surface)}
+  .rota thead th .dw{display:block;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+  .rota thead th .dd{display:inline-grid;place-items:center;min-width:28px;height:28px;margin-top:2px;font-size:17px;font-weight:500;border-radius:50%}
+  .rota thead th.tcol .dd{background:var(--red);color:#fff;font-weight:600}
+  .rota thead th.tcol .dw{color:var(--red)}
+  .rota .name{position:sticky;left:0;z-index:2;text-align:left;min-width:132px;max-width:160px;overflow:hidden;text-overflow:ellipsis;padding-left:16px;
+    box-shadow:inset -.5px 0 0 var(--sep)}
+  .rota thead th.name{z-index:4;font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.02em}
+  .rota .name button{all:unset;cursor:pointer;font-size:15px;font-weight:500}
+  .rota .name button:hover{color:var(--accent)}
+  .rota .name small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+  .rota tr.team td{background:var(--bg);height:34px;font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;text-align:left;box-shadow:none}
+  .rota tr.team td.name{background:var(--bg);overflow:visible;text-overflow:clip;max-width:none}
+  .rota tr.notes td{font-size:12px;color:var(--muted);white-space:normal;height:auto}
+  .rota tr.notes td.name{font-size:13px}
+  .rota td.we,.rota th.we{background-image:linear-gradient(var(--weekend),var(--weekend))}
+  .rota td.tcol{background-image:linear-gradient(var(--today-col),var(--today-col))}
+  .rota tr.me td{background-color:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+  .rota tr.me td.name{box-shadow:inset 3px 0 0 var(--accent),inset -.5px 0 0 var(--sep)}
+  .rota tr.me td.name button{color:var(--accent);font-weight:600}
+  .rota .other-m{opacity:.5}
+  .rota td.shift{cursor:pointer;position:relative;transition:background-color .12s ease}
+  .rota td.shift:hover{background-color:var(--surface-2)}
+  .rota tr.me td.shift:hover{background-color:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+  .rota td.has-note::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--dot)}
+  .legend{display:flex;gap:6px 8px;flex-wrap:wrap;align-items:center;margin:14px 4px 0;font-size:13px;color:var(--muted)}
+  .legend .dotkey{display:inline-flex;align-items:center;gap:6px}
+  .legend .dotkey::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--dot)}
+
+  /* full screen: just the grid */
   .fs-bar{display:none}
   body.fs{overflow:hidden}
-  body.fs .fs-bar{display:flex;align-items:center;gap:8px;position:fixed;inset:0 0 auto;z-index:60;height:52px;
-    padding:env(safe-area-inset-top,0px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));
-    background:var(--surface);border-bottom:1px solid var(--border);box-sizing:content-box}
-  body.fs .fs-bar b{font-size:16px;min-width:110px;text-align:center}
-  body.fs .table-wrap{position:fixed;z-index:59;left:0;right:0;bottom:0;top:calc(53px + env(safe-area-inset-top,0px));
-    max-height:none;border-radius:0;border:0}
-  table.rota{border-collapse:separate;border-spacing:0;font-size:13px;min-width:100%}
-  .rota th,.rota td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:6px 6px;text-align:center;white-space:nowrap;background:var(--surface)}
-  .rota thead th{position:sticky;top:0;z-index:3;background:var(--surface-2);font-weight:600;font-size:12px;min-width:66px}
-  .rota thead th .dw{display:block;color:var(--muted);font-weight:500;font-size:11px}
-  .rota thead th .dd{display:block;font-size:15px}
-  .rota .name{position:sticky;left:0;z-index:2;text-align:left;font-weight:600;min-width:130px;max-width:160px;overflow:hidden;text-overflow:ellipsis}
-  .rota thead th.name{z-index:4}
-  .rota .name button{all:unset;cursor:pointer}
-  .rota .name button:hover{color:var(--accent);text-decoration:underline}
-  .rota .name small{display:block;font-weight:400;color:var(--muted);font-size:11px}
-  .rota tr.team td{background:var(--accent-soft);color:var(--accent);font-weight:700;text-align:left;text-transform:uppercase;font-size:12px;letter-spacing:.06em}
-  .rota tr.team td.name{background:var(--accent-soft)}
-  .rota tr.me td{background:var(--me)}
-  .rota tr.me td.name{box-shadow:inset 3px 0 0 var(--me-line)}
-  .rota tr.notes td{background:var(--surface);font-size:11px;color:var(--muted);white-space:normal;min-width:66px}
-  .rota tr.notes td.name{font-weight:500;font-style:italic}
-  .rota .we{background:var(--weekend)}
-  .rota .tcol{background:var(--today)!important;box-shadow:inset 0 0 0 1px var(--today-line)}
-  .rota thead th.tcol{color:var(--text)}
-  .rota .other-m{opacity:.55}
-  .rota tbody tr.staff:hover td{filter:brightness(.97)}
-  .rota td.shift{cursor:pointer;position:relative}
-  .rota td.shift:hover{outline:2px solid var(--accent);outline-offset:-2px}
-  .rota td.has-note::after{content:"";position:absolute;top:0;right:0;border-style:solid;border-width:0 9px 9px 0;border-color:transparent var(--today-line) transparent transparent}
+  body.fs .fs-bar{display:flex;align-items:center;gap:8px;position:fixed;inset:0 0 auto;z-index:60;height:54px;
+    padding:env(safe-area-inset-top,0px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));box-sizing:content-box;
+    background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--sep)}
+  body.fs .fs-bar b{font-size:17px;font-weight:600;min-width:130px;text-align:center;letter-spacing:-.02em}
+  body.fs .table-wrap{position:fixed;z-index:59;left:0;right:0;bottom:0;top:calc(54px + env(safe-area-inset-top,0px));max-height:none;border-radius:0}
 
-  /* ===== Shift notes ===== */
-  .clickable{cursor:pointer}
-  .day.clickable:hover,.team-card li.clickable:hover{background:var(--surface-2)}
-  .shift-note{display:block;font-size:12px;margin-top:3px;color:var(--text);white-space:normal}
-  .team-card li span{min-width:0}
-  #noteDlg{border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);padding:0;width:min(420px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(0,0,0,.25)}
-  #noteDlg::backdrop{background:rgba(0,0,0,.4)}
-  .note-form{display:grid;gap:10px;padding:20px}
-  .note-form h3{margin:0;font-size:18px}
-  .note-form textarea{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:10px 12px;font:inherit;resize:vertical;min-height:96px}
-  .note-actions{display:flex;gap:8px;align-items:center}
-  .btn-primary{height:40px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;padding:0 16px;cursor:pointer}
-  .btn-primary:disabled{opacity:.5;cursor:default}
-  .btn-ghost{height:40px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:0 14px;cursor:pointer}
-  #noteDelete{color:var(--sick-t)}
+  /* ---------- note sheet ---------- */
+  #noteDlg{border:0;padding:0;border-radius:14px;background:var(--surface);color:var(--text);width:min(440px,calc(100vw - 24px));
+    box-shadow:0 30px 80px rgba(0,0,0,.3)}
+  #noteDlg[open]{animation:sheet .28s cubic-bezier(.2,.8,.2,1)}
+  @keyframes sheet{from{transform:translateY(16px) scale(.98);opacity:0}}
+  #noteDlg::backdrop{background:rgba(0,0,0,.35)}
+  .sheet-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:12px 8px;border-bottom:.5px solid var(--sep)}
+  .sheet-head .t{text-align:center;line-height:1.2}
+  .sheet-head .t b{display:block;font-size:17px;font-weight:600}
+  .sheet-head .t span{font-size:13px;color:var(--muted)}
+  .textbtn{border:0;background:none;color:var(--accent);font-size:17px;padding:6px 8px;border-radius:8px;justify-self:start}
+  .textbtn.strong{font-weight:600;justify-self:end}
+  .textbtn:active{opacity:.4}
+  .textbtn:disabled{opacity:.35}
+  .sheet-body{padding:16px;display:grid;gap:10px}
+  .sheet-body .shiftline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:15px}
+  .sheet-body textarea{width:100%;border:0;border-radius:var(--r);background:var(--fill);padding:12px 14px;font-size:16px;resize:vertical;min-height:110px}
+  .sheet-body textarea::placeholder{color:var(--muted)}
+  .sheet-meta{font-size:13px;color:var(--muted)}
+  .danger{border:0;background:var(--fill);color:var(--red);height:44px;border-radius:var(--r);font-size:16px;font-weight:500}
+  .danger:active{transform:scale(.98)}
+  .err{color:var(--red);font-size:14px;min-height:1em;margin:0}
 
-  /* ===== Day view ===== */
-  .day-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-  .day-nav h2{margin:0;min-width:220px}
-  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-  .team-card h3{margin:0;padding:12px 16px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);border-bottom:1px solid var(--border)}
-  .team-card ul{list-style:none;margin:0;padding:6px 0}
-  .team-card li{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;gap:8px}
-  .team-card li.away{opacity:.6}
-  .team-card .tnote{padding:8px 16px;font-size:12px;color:var(--muted);border-bottom:1px dashed var(--border)}
-
-  .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;font-size:12px;color:var(--muted);align-items:center}
-  .empty{padding:40px 20px;text-align:center;color:var(--muted)}
-  .error{padding:14px 16px;border-color:var(--sick-t);color:var(--sick-t);margin-bottom:16px}
-  .switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
-  .hidden{display:none!important}
-
-  /* ===== Passcode lock ===== */
-  #lock{display:none;min-height:100vh;place-items:center;padding:24px 16px}
+  /* ---------- passcode screen ---------- */
+  #lock{display:none;min-height:100vh;min-height:100dvh;place-items:center;padding:calc(24px + env(safe-area-inset-top,0px)) 16px 24px}
   body.locked #lock{display:grid}
-  body.locked header, body.locked main{display:none}
-  .lock-card{width:100%;max-width:360px;padding:28px 24px;display:grid;gap:12px;text-align:center}
-  .lock-logo{width:48px;height:48px;font-size:22px;border-radius:12px;margin:0 auto}
+  body.locked header,body.locked main,body.locked .tabbar{display:none!important}
+  .lock-card{width:100%;max-width:340px;display:grid;justify-items:center;text-align:center}
+  .lock-icon{width:64px;height:64px;border-radius:15px;font-size:28px}
+  .lock-card h2{font-size:22px;font-weight:600;letter-spacing:-.02em;margin:16px 0 4px}
   .lock-card p{margin:0}
-  .lock-card input{height:46px;border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:0 14px;font-size:16px;text-align:center}
-  .unlock{height:46px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
-  .unlock:disabled{opacity:.6;cursor:wait}
-  .lock-msg{color:var(--sick-t);font-size:13px;min-height:1em}
+  .dots{display:flex;gap:18px;margin:24px 0 8px;height:14px}
+  .dots i{width:13px;height:13px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--text);transition:background-color .12s ease}
+  .dots i.on{background:var(--text)}
+  .dots.shake{animation:shake .4s ease}
+  @keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+  .lock-msg{color:var(--red);font-size:14px;min-height:20px;margin:6px 0 10px!important}
+  .keypad{display:grid;grid-template-columns:repeat(3,78px);gap:16px 24px;justify-content:center}
+  .key{width:78px;height:78px;border-radius:50%;border:0;background:var(--fill);display:grid;place-content:center;line-height:1;
+    transition:background-color .1s ease, transform .1s ease;user-select:none;-webkit-user-select:none}
+  .key b{font-size:32px;font-weight:400}
+  .key small{font-size:10px;font-weight:600;letter-spacing:.14em;color:var(--muted);margin-top:2px;min-height:12px}
+  .key:active,.key.press{background:var(--fill-2);transform:scale(.96)}
+  .key.ghost{background:none;font-size:16px;color:var(--text)}
+  .key.ghost:active{background:var(--fill)}
+  .lock-card .hint{font-size:13px;color:var(--muted);margin-top:22px!important}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-  @media (max-width:640px){
-    .status{display:none}
-    nav.tabs{overflow-x:auto}
-    nav.tabs button{padding:10px 10px}
-    .day-nav h2{flex-basis:100%;order:-1;font-size:18px}
-    .hero{grid-template-columns:1fr;text-align:left}
-    .stats{grid-template-columns:repeat(3,1fr)}
-    .stat{padding:10px}
-    .stat .n{font-size:18px}
-    .table-wrap{max-height:calc(100vh - 260px)}
-    .rota .name{min-width:96px;max-width:110px}
-    .rota thead th{min-width:54px}
+  @media (max-width:700px){
+    .seg-row,.status{display:none}
+    main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+    h1{font-size:32px}
+    .tabbar{display:grid;grid-template-columns:repeat(3,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;
+      padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));
+      background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)}
+    .tabbar button{border:0;background:none;display:grid;justify-items:center;gap:2px;padding:4px 0;color:var(--muted);font-size:11px;font-weight:500}
+    .tabbar button svg{width:26px;height:26px}
+    .tabbar button[aria-selected="true"]{color:var(--accent)}
+    .tabbar button:active{opacity:.6}
+    body.fs .tabbar{display:none}
+    .next{padding:16px}
+    .next .what{font-size:20px}
+    .stat{padding:12px}
+    .stat .n{font-size:21px}
+    .teams{grid-template-columns:1fr}
+    .table-wrap{max-height:calc(100vh - 330px)}
+    .rota .name{min-width:100px;max-width:112px;padding-left:12px}
+    .rota thead th{min-width:52px}
+    .search{max-width:none}
+    .keypad{grid-template-columns:repeat(3,76px);gap:14px 22px}
+    .key{width:76px;height:76px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
   }
 </style>
 </head>
 <body class="locked">
+
 <div id="lock">
-  <form class="card lock-card" id="lockForm" autocomplete="off">
-    <div class="logo lock-logo">R</div>
-    <h2>Club Rota</h2>
-    <p class="muted">Staff only. Enter the staff passcode to see the rota.</p>
-    <input type="password" id="passcode" placeholder="Passcode" aria-label="Staff passcode" autocomplete="current-password" inputmode="numeric">
-    <button type="submit" class="unlock" id="unlockBtn">Unlock</button>
+  <form class="lock-card" id="lockForm" autocomplete="off">
+    <div class="app-icon lock-icon">R</div>
+    <h2>Enter Passcode</h2>
+    <p class="muted">Club Rota is for staff only.</p>
+    <input class="sr" type="password" id="passcode" aria-label="Staff passcode" autocomplete="current-password" inputmode="numeric" maxlength="12">
+    <div class="dots" id="dots" aria-hidden="true"></div>
     <p class="lock-msg" id="lockMsg" role="alert"></p>
-    <p class="muted" style="font-size:12px;margin:0">You’ll only need to enter it once on this device.</p>
+    <div class="keypad" id="keypad">
+      <button type="button" class="key" data-k="1"><b>1</b><small></small></button>
+      <button type="button" class="key" data-k="2"><b>2</b><small>ABC</small></button>
+      <button type="button" class="key" data-k="3"><b>3</b><small>DEF</small></button>
+      <button type="button" class="key" data-k="4"><b>4</b><small>GHI</small></button>
+      <button type="button" class="key" data-k="5"><b>5</b><small>JKL</small></button>
+      <button type="button" class="key" data-k="6"><b>6</b><small>MNO</small></button>
+      <button type="button" class="key" data-k="7"><b>7</b><small>PQRS</small></button>
+      <button type="button" class="key" data-k="8"><b>8</b><small>TUV</small></button>
+      <button type="button" class="key" data-k="9"><b>9</b><small>WXYZ</small></button>
+      <span></span>
+      <button type="button" class="key" data-k="0"><b>0</b><small></small></button>
+      <button type="button" class="key ghost" data-k="del" aria-label="Delete">Delete</button>
+    </div>
+    <button type="submit" class="sr" id="unlockBtn" tabindex="-1">Unlock</button>
+    <p class="hint">You’ll only need to enter it once on this device.</p>
   </form>
 </div>
+
 <header>
   <div class="wrap bar">
-    <div class="brand"><div class="logo">R</div>Club Rota</div>
+    <div class="brand"><div class="app-icon">R</div>Club Rota</div>
     <div class="spacer"></div>
     <span class="status" id="status">Loading…</span>
-    <button class="icon-btn" id="refresh" title="Refresh from Google Sheets" aria-label="Refresh">
-      <svg id="refreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+    <button class="btn icon plain" id="refresh" title="Refresh" aria-label="Refresh">
+      <svg id="refreshIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8.5"/><path d="M20 3.5v5h-5"/></svg>
     </button>
-    <button class="icon-btn" id="theme" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
-    <button class="icon-btn" id="lockBtn" title="Lock the rota on this device" aria-label="Lock">🔒</button>
+    <button class="btn icon plain" id="theme" title="Light or dark" aria-label="Switch light or dark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="btn icon plain" id="lockBtn" title="Lock on this device" aria-label="Lock">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>
+    </button>
   </div>
-  <div class="wrap">
-    <nav class="tabs" role="tablist">
-      <button role="tab" data-view="me" aria-selected="true">My shifts</button>
-      <button role="tab" data-view="day" aria-selected="false">Who's in</button>
-      <button role="tab" data-view="rota" aria-selected="false">Full rota</button>
+  <div class="wrap seg-row">
+    <nav class="segmented" role="tablist" aria-label="Views">
+      <button role="tab" data-view="me" aria-selected="true">My Shifts</button>
+      <button role="tab" data-view="day" aria-selected="false">Who’s In</button>
+      <button role="tab" data-view="rota" aria-selected="false">Rota</button>
     </nav>
   </div>
 </header>
 
 <main class="wrap">
-  <div id="error" class="card error hidden"></div>
+  <div id="error" class="banner hidden"></div>
 
   <!-- My shifts -->
   <section id="view-me">
-    <div class="card me-head">
-      <div style="flex:1;min-width:200px">
-        <h2 id="meTitle">My shifts</h2>
-        <div class="muted" id="meSub">Choose your name to see your upcoming shifts.</div>
+    <div class="large-title">
+      <div class="eyebrow" id="meDate"></div>
+      <h1 id="meTitle">My Shifts</h1>
+      <div class="subtitle" id="meSub">Loading the rota…</div>
+    </div>
+    <div class="group picker">
+      <label class="row" for="staffSelect"><span class="label">Name</span>
+        <select id="staffSelect" aria-label="Choose your name"><option value="">Select…</option></select></label>
+      <div class="row">
+        <span class="label muted" style="font-size:15px">Personal link for your home screen</span><span class="spacer"></span>
+        <button class="btn" id="copyLink" data-label="Copy link">Copy link</button>
       </div>
-      <select id="staffSelect" aria-label="Choose staff member"><option value="">Select your name…</option></select>
-      <button class="icon-btn" id="copyLink" title="Copy a personal link you can bookmark">🔗 My link</button>
     </div>
     <div id="meBody"></div>
   </section>
 
   <!-- Who's in -->
   <section id="view-day" class="hidden">
+    <div class="large-title">
+      <div class="eyebrow" id="dayEyebrow">Who’s In</div>
+      <h1 id="dayTitle"></h1>
+    </div>
     <div class="day-nav">
-      <button class="icon-btn" id="dayPrev" aria-label="Previous day">‹</button>
-      <h2 id="dayTitle"></h2>
-      <button class="icon-btn" id="dayNext" aria-label="Next day">›</button>
-      <button class="icon-btn" id="dayToday">Today</button>
-      <input type="date" id="dayPick" aria-label="Pick a date" style="height:36px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:0 8px">
+      <button class="btn icon" id="dayPrev" aria-label="Previous day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="btn icon" id="dayNext" aria-label="Next day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="btn" id="dayToday">Today</button>
+      <input type="date" id="dayPick" class="date-field" aria-label="Pick a date">
     </div>
     <div id="dayBody"></div>
   </section>
 
   <!-- Full rota -->
   <section id="view-rota" class="hidden">
-    <div class="rota-tools">
-      <div class="months" id="months"></div>
+    <div class="large-title">
+      <div class="eyebrow">All staff</div>
+      <h1>Rota</h1>
     </div>
+    <div class="months" id="months"></div>
     <div class="rota-tools">
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+        <input type="search" id="nameFilter" placeholder="Search" aria-label="Search name"></label>
       <select id="teamFilter" aria-label="Filter by team"><option value="">All teams</option></select>
-      <input type="search" id="nameFilter" placeholder="Search name…" aria-label="Search name">
-      <button class="icon-btn" id="jumpToday">Jump to today</button>
-      <button class="icon-btn" id="fsOpen" title="Show just the rota, full screen">⛶ Full screen</button>
+      <button class="btn" id="jumpToday">Today</button>
+      <button class="btn" id="fsOpen" title="Show just the rota, full screen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Full screen</button>
     </div>
     <div class="fs-bar" id="fsBar">
-      <button class="icon-btn" id="fsPrev" aria-label="Previous month">‹</button>
+      <button class="btn icon" id="fsPrev" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
       <b id="fsMonth"></b>
-      <button class="icon-btn" id="fsNext" aria-label="Next month">›</button>
+      <button class="btn icon" id="fsNext" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
       <span class="spacer"></span>
-      <button class="icon-btn" id="fsToday">Today</button>
-      <button class="icon-btn" id="fsClose" aria-label="Close full screen">✕</button>
+      <button class="btn" id="fsToday">Today</button>
+      <button class="btn" id="fsClose">Done</button>
     </div>
-    <div class="card table-wrap" id="tableWrap"></div>
+    <div class="table-wrap" id="tableWrap"></div>
+    <div class="legend">
+      <span class="chip k-early">E Early</span>
+      <span class="chip k-late">L Late</span>
+      <span class="chip k-in">IN</span>
+      <span class="chip k-time">Set hours</span>
+      <span class="chip k-work">Other duty</span>
+      <span class="chip k-leave">AL Leave</span>
+      <span class="chip k-off">Off</span>
+      <span class="chip k-sick">Sick</span>
+      <span class="dotkey">Has a note. Tap any shift to add one, saved on this device.</span>
+    </div>
   </section>
 
   <dialog id="noteDlg">
-    <form method="dialog" class="note-form">
-      <h3 id="noteTitle"></h3>
-      <div class="muted" id="noteShift"></div>
-      <textarea id="noteText" maxlength="300" rows="4" placeholder="Add note"></textarea>
-      <div class="muted" id="noteMeta" style="font-size:12px"></div>
-      <div class="note-actions">
-        <button type="button" class="btn-ghost" id="noteDelete">Delete</button>
-        <span class="spacer"></span>
-        <button type="submit" class="btn-ghost" value="cancel">Cancel</button>
-        <button type="button" class="btn-primary" id="noteSave">Save note</button>
+    <form method="dialog">
+      <div class="sheet-head">
+        <button type="submit" class="textbtn" value="cancel">Cancel</button>
+        <div class="t"><b id="noteTitle"></b><span id="noteDate"></span></div>
+        <button type="button" class="textbtn strong" id="noteSave">Save</button>
       </div>
-      <p class="lock-msg" id="noteErr" role="alert"></p>
+      <div class="sheet-body">
+        <div class="shiftline" id="noteShift"></div>
+        <textarea id="noteText" maxlength="300" rows="4" placeholder="Add note"></textarea>
+        <div class="sheet-meta" id="noteMeta"></div>
+        <button type="button" class="danger" id="noteDelete">Delete Note</button>
+        <p class="err" id="noteErr" role="alert"></p>
+      </div>
     </form>
   </dialog>
-
-  <div class="legend" id="legend">
-    <span>Key:</span>
-    <span class="chip k-early">E · Early</span>
-    <span class="chip k-late">L · Late</span>
-    <span class="chip k-in">IN</span>
-    <span class="chip k-time">Set hours</span>
-    <span class="chip k-work">Other duty</span>
-    <span class="chip k-leave">AL · Leave</span>
-    <span class="chip k-off">OFF / RDO</span>
-    <span class="chip k-sick">Sick</span>
-    <span>· Tap any shift to add a note (saved on this device only). A gold corner means it has one; hover or tap to read it.</span>
-  </div>
 </main>
+
+<nav class="tabbar" role="tablist" aria-label="Views">
+  <button role="tab" data-view="me" aria-selected="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/></svg>My Shifts</button>
+  <button role="tab" data-view="day" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="9.5" r="2.8"/><path d="M16.5 14.6c2.6.1 4.5 1.7 5 4.4"/></svg>Who’s In</button>
+  <button role="tab" data-view="rota" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="3"/><path d="M3.5 9.5h17M3.5 14.8h17M9.2 4v16M14.8 4v16"/></svg>Rota</button>
+</nav>
 
 <script>
 /* ===== Settings ===== */
 // The sheet's ID, encrypted with the staff passcode. Set it with set-passcode.js (kept out of Git).
 const LOCK = {"salt":"/aiRKdYccOX8htYL/67v3A==","iv":"cDhNL3o4EQy+hOQO","data":"kuM3fNnug9/g/bqgiLqAcoGYXPLK3N8JAzSwEyzguTleCUQJLbgbFb4F+umcqXM4dA==","iter":600000};
 let SHEET_ID = null;
+const PASSCODE_LENGTH = 4;   // digits on the keypad before it tries to unlock
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const AUTO_REFRESH_MIN = 5;
-const UPCOMING_DAYS = 42;
 // The sheet doesn't always separate these teams, so these people are always placed here
 const FIXED_TEAMS = {
   'Clean Team': ['Diego','Diana','Saadat','Paula','Adetola','Isaac','Mohamed'],
   'Lifeguards': ['Shahed','Zaid','Noah','Andrew','Ibrahim','Zijian','Dylan','Emily','Alfie','Ryan','Jessica'],
 };
+const SPLIT_SECTIONS = new Set(Object.keys(FIXED_TEAMS).map(t => t.toLowerCase()));
 const TEAM_OF = new Map(Object.entries(FIXED_TEAMS).flatMap(([t, names]) => names.map(n => [n.toLowerCase(), t])));
 // The sheet spells some names differently from month to month; these all mean the same person
 const NAME_ALIASES = {
@@ -438,19 +594,40 @@ function parseMonth(name, mIdx, rows){
       if (team) cells.forEach((v,i) => v && team.notes[i].push(v));
     } else {
       if (!team){ team = {name:'Staff', notes: cells.map(() => []), staff: []}; teams.push(team); }
+      // The sheet's section decides the team. The fixed lists only split the mixed
+      // Clean Team / Lifeguards section, so a promotion (e.g. into Management) shows as it is.
       const fixed = TEAM_OF.get(nm.toLowerCase());
       let home = team;
-      if (fixed && fixed.toLowerCase() !== team.name.toLowerCase()){
+      if (fixed && SPLIT_SECTIONS.has(team.name.toLowerCase()) && fixed.toLowerCase() !== team.name.toLowerCase()){
         home = teams.find(t => t.name.toLowerCase() === fixed.toLowerCase());
         if (!home){ home = {name: fixed, notes: cells.map(() => []), staff: []}; teams.push(home); }
       }
-      // the same person listed twice in a month becomes one row
-      const dup = home.staff.find(x => x.name === nm);
-      if (dup){ dup.cells = dup.cells.map((v, i) => v || cells[i]); dup.hours = dup.hours !== '0' && dup.hours ? dup.hours : hrs; }
-      else home.staff.push({name: nm, hours: hrs, cells});
+      home.staff.push({name: nm, hours: hrs, cells});
     }
   }
+  mergeDuplicates(teams);
   return {name, mIdx, year, cols, teams};
+}
+
+// Someone listed twice in a month (e.g. a new Management row plus their old row) becomes one row,
+// kept in the section of the row that holds most of their shifts.
+function mergeDuplicates(teams){
+  const byName = new Map();
+  for (const t of teams) for (const s of t.staff){
+    if (!byName.has(s.name)) byName.set(s.name, []);
+    byName.get(s.name).push({t, s});
+  }
+  const count = s => s.cells.filter(Boolean).length;
+  for (const list of byName.values()){
+    if (list.length < 2) continue;
+    list.sort((a, b) => count(b.s) - count(a.s));
+    const keep = list[0].s;
+    for (const {t, s} of list.slice(1)){
+      keep.cells = keep.cells.map((v, i) => v || s.cells[i]);
+      if (!keep.hours || keep.hours === '0') keep.hours = s.hours;
+      t.staff.splice(t.staff.indexOf(s), 1);
+    }
+  }
 }
 
 /* ---------- Data loading ---------- */
@@ -485,13 +662,15 @@ function index(){
         }
       }
     });
+    // months are in order, so the last one that lists someone with shifts gives their current team
     for (const t of m.teams) for (const s of t.staff){
-      const e = staff.get(s.name) || {name: s.name, teams: new Set(), hours: s.hours};
-      e.teams.add(t.name); e.hours = s.hours || e.hours;
+      const e = staff.get(s.name) || {name: s.name, team: t.name, hours: s.hours};
+      if (s.cells.some(Boolean) || !e.hasShifts){ e.team = t.name; e.hasShifts = e.hasShifts || s.cells.some(Boolean); }
+      if (s.hours && s.hours !== '0') e.hours = s.hours;
       staff.set(s.name, e);
     }
   }
-  staffList = [...staff.values()].map(s => ({...s, teams: [...s.teams]})).sort((a,b) => a.name.localeCompare(b.name));
+  staffList = [...staff.values()].sort((a,b) => a.name.localeCompare(b.name));
 }
 
 let loading = false;
@@ -545,7 +724,8 @@ function openNote(date, name, value){
   editing = {key: noteKey(date, name)};
   const n = shiftNotes.get(editing.key);
   $('#noteTitle').textContent = name;
-  $('#noteShift').innerHTML = `${esc(date.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long'}))}${value ? ' · ' + chip(value) : ''}`;
+  $('#noteDate').textContent = date.toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short'});
+  $('#noteShift').innerHTML = value ? `${chip(value)} ${esc(describe(value))}` : 'Not rostered';
   $('#noteText').value = n ? n.text : '';
   $('#noteDelete').classList.toggle('hidden', !n);
   $('#noteMeta').textContent = n && n.at ? 'Saved ' + new Date(n.at).toLocaleString([], {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
@@ -570,7 +750,7 @@ let dayDate = today0();
 
 function setView(v){
   view = v;
-  document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.view === v));
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-selected', b.dataset.view === v));
   ['me','day','rota'].forEach(x => $('#view-'+x).classList.toggle('hidden', x !== v));
   store.set('rota.view', v);
   renderAll();
@@ -591,8 +771,8 @@ function currentMe(){ return canonical(store.get('rota.me') || ''); }
 function renderStaffSelect(){
   const sel = $('#staffSelect'), me = currentMe();
   const groups = new Map();
-  for (const s of staffList){ const g = s.teams[0]; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(s); }
-  let html = '<option value="">Select your name…</option>';
+  for (const s of staffList){ if (!groups.has(s.team)) groups.set(s.team, []); groups.get(s.team).push(s); }
+  let html = '<option value="">Select…</option>';
   for (const [g, list] of groups) html += `<optgroup label="${esc(g)}">` + list.map(s => `<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('') + '</optgroup>';
   if (sel.dataset.sig !== html){ sel.innerHTML = html; sel.dataset.sig = html; }
   sel.value = me;
@@ -603,7 +783,8 @@ function relLabel(d){
   if (diff === 0) return 'Today';
   if (diff === 1) return 'Tomorrow';
   if (diff < 7) return `In ${diff} days`;
-  return `In ${Math.round(diff/7)} wk${diff >= 14 ? 's' : ''}`;
+  const w = Math.round(diff / 7);
+  return `In ${w} week${w > 1 ? 's' : ''}`;
 }
 
 function shiftsFor(name, from, days){
@@ -618,94 +799,109 @@ function shiftsFor(name, from, days){
   return out;
 }
 
+// The last day the sheet has a rota for (the end of the last month tab)
+function rotaEnd(){
+  const m = data.months[data.months.length - 1];
+  const own = m.cols.filter(c => !c.spill);
+  return own[own.length - 1].date;
+}
+
+const chevron = '<svg class="chev" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5l5 5-5 5"/></svg>';
+const longDate = d => d.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long'});
+
 function renderMe(){
-  const me = currentMe(), body = $('#meBody');
+  const me = currentMe(), body = $('#meBody'), t0 = today0();
+  $('#meDate').textContent = longDate(t0);
   const s = staffList.find(x => x.name === me);
   if (!s){
-    $('#meTitle').textContent = 'My shifts';
-    $('#meSub').textContent = 'Choose your name to see your upcoming shifts. Your choice is remembered on this device.';
-    body.innerHTML = `<div class="card empty" style="margin-top:16px">👋 Pick your name above to get started.</div>`;
+    $('#meTitle').textContent = 'My Shifts';
+    $('#meSub').textContent = 'Choose your name to see your shifts. This device will remember it.';
+    body.innerHTML = '';
     return;
   }
-  $('#meTitle').textContent = `Hi ${s.name}`;
-  $('#meSub').textContent = `${s.teams.join(' · ')}${s.hours && s.hours !== '0' ? ` · ${s.hours} hrs/week contract` : ''}`;
+  $('#meTitle').textContent = `Hi, ${s.name}`;
+  $('#meSub').textContent = `${s.team}${s.hours && s.hours !== '0' ? ` · ${s.hours} hours a week` : ''}`;
 
-  const t0 = today0();
-  const days = shiftsFor(s.name, t0, UPCOMING_DAYS);
-  const working = days.filter(x => x.values.some(v => isWork(kind(v))));
+  // every day from today to the end of the rota
+  const span = Math.max(0, Math.round((rotaEnd() - t0) / 864e5) + 1);
+  const days = shiftsFor(s.name, t0, span);
+  const isWorkDay = x => x.values.some(v => isWork(kind(v)));
+  const working = days.filter(isWorkDay);
   const next = working[0];
-  const in7 = days.slice(0, 7).filter(x => x.values.some(v => isWork(kind(v)))).length;
+  const in7 = days.slice(0, 7).filter(isWorkDay).length;
   const leave = days.filter(x => x.values.some(v => kind(v) === 'leave')).length;
   const showRest = store.get('rota.showRest') === '1';
 
-  let html = '';
+  let html = '<div class="section-h">Up next</div>';
   if (next){
-    const v = next.values.find(v => isWork(kind(v)));
-    html += `<div class="card hero">
-      <div class="date-tile"><div class="m">${DOW[next.d.getDay()]}</div><div class="d">${next.d.getDate()}</div><div class="m">${MONTHS[next.d.getMonth()].slice(0,3)}</div></div>
-      <div><div class="lbl">Next shift · ${relLabel(next.d)}</div>
-      <div class="when">${next.d.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long'})}</div>
-      <div class="what">${esc(next.values.filter(v => isWork(kind(v))).map(describe).join(' + '))}</div></div></div>`;
+    html += `<div class="group next row tap" data-note-date="${dkey(next.d)}" data-note-name="${esc(s.name)}" data-note-value="${esc(next.values[0] || '')}">
+      <div class="cal"><div class="w">${DOW[next.d.getDay()]}</div><div class="d">${next.d.getDate()}</div></div>
+      <div><div class="when">${relLabel(next.d)}</div>
+        <div class="what">${esc(next.values.filter(v => isWork(kind(v))).map(describe).join(' + '))}</div>
+        <div class="date">${esc(longDate(next.d))}</div></div></div>`;
   } else {
-    html += `<div class="card empty" style="margin-top:16px">No shifts on the rota in the next ${UPCOMING_DAYS} days.</div>`;
+    html += `<div class="group empty">No more shifts on the rota yet.</div>`;
   }
-  html += `<div class="stats">
-    <div class="card stat"><div class="n">${in7}</div><div class="t">shifts next 7 days</div></div>
-    <div class="card stat"><div class="n">${working.length}</div><div class="t">shifts next 6 weeks</div></div>
-    <div class="card stat"><div class="n">${leave}</div><div class="t">leave days ahead</div></div></div>`;
-
-  html += `<div class="list-tools"><b>Upcoming</b>
-    <label class="switch"><input type="checkbox" id="showRest" ${showRest ? 'checked' : ''}> Show days off</label></div>`;
+  html += `<div class="group stats">
+    <div class="stat"><div class="n">${in7}</div><div class="t">Next 7 days</div></div>
+    <div class="stat"><div class="n">${working.length}</div><div class="t">Shifts to come</div></div>
+    <div class="stat"><div class="n">${leave}</div><div class="t">Leave days</div></div></div>`;
 
   // group by week (Mon start)
   const weeks = new Map();
   for (const x of days){
     if (x.missing) continue;
     const hasAny = x.values.length > 0;
-    const work = x.values.some(v => isWork(kind(v)));
-    if (!work && !showRest && !(hasAny && kind(x.values[0]) !== 'off')) continue;
+    if (!isWorkDay(x) && !showRest && !(hasAny && kind(x.values[0]) !== 'off')) continue;
     const mon = addDays(x.d, -((x.d.getDay() + 6) % 7));
     const k = dkey(mon);
     if (!weeks.has(k)) weeks.set(k, []);
     weeks.get(k).push(x);
   }
-  if (!weeks.size) html += `<div class="card empty">Nothing to show.</div>`;
+  // the first heading also holds the "Days off" switch
+  const toggle = `<label class="switch">Days off <input type="checkbox" id="showRest" ${showRest ? 'checked' : ''}></label>`;
+  if (!weeks.size) html += `<div class="section-h"><span>Upcoming</span>${toggle}</div><div class="group empty">Nothing to show.</div>`;
+  const thisMon = dkey(addDays(t0, -((t0.getDay() + 6) % 7)));
+  const fmt = d => d.toLocaleDateString(undefined, {day:'numeric', month:'short'});
+  let first = true;
   for (const [k, list] of weeks){
     const mon = fromKey(k), sun = addDays(mon, 6);
-    const isThis = dkey(addDays(t0, -((t0.getDay() + 6) % 7))) === k;
-    const fmt = d => d.toLocaleDateString(undefined, {day:'numeric', month:'short'});
-    html += `<div class="card week"><div class="week-h">${isThis ? 'This week · ' : ''}${fmt(mon)} – ${fmt(sun)}</div>`;
+    const label = k === thisMon ? 'This week' : `${fmt(mon)} – ${fmt(sun)}`;
+    html += `<div class="section-h"><span>${label}</span>${first ? toggle : ''}</div>`;
+    first = false;
+    html += `<div class="group">`;
     for (const x of list){
-      const work = x.values.some(v => isWork(kind(v)));
       const isT = dkey(x.d) === dkey(t0);
       const sn = noteFor(x.d, s.name);
-      html += `<div class="day clickable ${isT ? 'is-today' : ''} ${work ? '' : 'rest'}" data-note-date="${dkey(x.d)}" data-note-name="${esc(s.name)}" data-note-value="${esc(x.values[0] || '')}" title="${sn ? 'Note: ' + esc(sn.text) : 'Tap to add a note'}">
+      html += `<div class="row tap day ${isT ? 'is-today' : ''} ${isWorkDay(x) ? '' : 'rest'}" data-note-date="${dkey(x.d)}" data-note-name="${esc(s.name)}" data-note-value="${esc(x.values[0] || '')}" title="${sn ? esc(sn.text) : 'Tap to add a note'}">
         <div class="dn"><span>${DOW[x.d.getDay()]}</span><b>${x.d.getDate()}</b></div>
-        <div>${x.values.length ? x.values.map(chip).join(' ') + `<div class="note">${esc(x.values.map(describe).join(' + '))}</div>` : '<span class="muted">Not rostered</span>'}
-          ${x.notes && x.notes.length ? `<div class="note">📌 ${esc(x.notes.join(' · '))}</div>` : ''}
-          ${sn ? `<div class="shift-note">📝 ${esc(sn.text)}</div>` : ''}</div>
-        <div class="rel">${relLabel(x.d)}</div></div>`;
+        <div class="body">${x.values.length ? x.values.map(chip).join(' ') + `<div class="desc">${esc(x.values.map(describe).join(' + '))}</div>` : '<span class="muted">Not rostered</span>'}
+          ${x.notes && x.notes.length ? `<div class="note">${esc(x.notes.join(' · '))}</div>` : ''}
+          ${sn ? `<div class="shift-note">${esc(sn.text)}</div>` : ''}</div>
+        <span class="rel">${relLabel(x.d)}</span>${chevron}</div>`;
     }
     html += `</div>`;
   }
-  const lastLoaded = data.months[data.months.length - 1];
-  if (days.some(x => x.missing)) html += `<p class="muted" style="font-size:13px">The rota currently runs to the end of ${lastLoaded.name}.</p>`;
+  html += `<p class="foot">The rota runs to ${esc(rotaEnd().toLocaleDateString(undefined, {day:'numeric', month:'long'}))}.</p>`;
   body.innerHTML = html;
   $('#showRest').onchange = e => { store.set('rota.showRest', e.target.checked ? '1' : '0'); renderMe(); };
 }
 
 /* ----- Who's in ----- */
+const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
 function personRow(e, cls){
   const n = noteFor(dayDate, e.name);
-  return `<li class="clickable ${cls}" data-note-name="${esc(e.name)}" data-note-value="${esc(e.value)}"${n ? ` title="${esc(n.text)}"` : ''}>
-    <span>${esc(e.name)}${n ? `<small class="shift-note">📝 ${esc(n.text)}</small>` : ''}</span>${chip(e.value)}</li>`;
+  return `<div class="row tap person ${cls}" data-note-name="${esc(e.name)}" data-note-value="${esc(e.value)}"${n ? ` title="${esc(n.text)}"` : ''}>
+    <div class="avatar">${esc(initials(e.name))}</div>
+    <div class="who"><b>${esc(e.name)}</b>${n ? `<div class="shift-note">${esc(n.text)}</div>` : ''}</div>${chip(e.value)}</div>`;
 }
 function renderDay(){
   const k = dkey(dayDate), isT = k === dkey(today0());
-  $('#dayTitle').textContent = (isT ? 'Today · ' : '') + dayDate.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long'});
+  $('#dayEyebrow').textContent = isT ? 'Who’s in today' : 'Who’s in';
+  $('#dayTitle').textContent = dayDate.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'short'});
   $('#dayPick').value = k;
   const entries = byDate.get(k);
-  if (!entries){ $('#dayBody').innerHTML = `<div class="card empty">No rota for this date yet.</div>`; return; }
+  if (!entries){ $('#dayBody').innerHTML = `<div class="group empty" style="margin-top:12px">No rota for this date yet.</div>`; return; }
   const teams = new Map(), seen = new Set();
   for (const e of entries){ if (!teams.has(e.team)) teams.set(e.team, []); }
   for (const e of entries){
@@ -728,13 +924,12 @@ function renderDay(){
     // order: early, in/time/other, late
     const order = {early:0, time:1, in:2, work:3, late:4};
     work.sort((a,b) => order[kind(a.value)] - order[kind(b.value)]);
-    html += `<div class="card team-card"><h3>${esc(t)} <span class="muted" style="font-weight:500">· ${work.length} in</span></h3>
-      ${tn.map(n => `<div class="tnote">📌 ${esc(n.note)}</div>`).join('')}
-      <ul>${work.map(e => personRow(e, '')).join('')}
-      ${away.map(e => personRow(e, 'away')).join('')}</ul></div>`;
+    html += `<div class="group"><div class="team-h"><h3>${esc(t)}</h3><span class="count">${work.length} in</span></div>
+      ${tn.map(n => `<div class="tnote">${esc(n.note)}</div>`).join('')}
+      <div class="rows">${work.map(e => personRow(e, '')).join('')}${away.map(e => personRow(e, 'away')).join('')}</div></div>`;
   }
   html += '</div>';
-  $('#dayBody').innerHTML = total || notes.length ? html : `<div class="card empty">Nobody is rostered on this day.</div>`;
+  $('#dayBody').innerHTML = total || notes.length ? html : `<div class="group empty" style="margin-top:12px">Nobody is rostered on this day.</div>`;
 }
 
 /* ----- Full rota ----- */
@@ -742,6 +937,8 @@ function renderMonths(){
   const cur = today0();
   $('#months').innerHTML = data.months.map((m, i) =>
     `<button data-i="${i}" aria-pressed="${i === rotaMonth}" class="${m.mIdx === cur.getMonth() && m.year === cur.getFullYear() ? 'cur' : ''}">${esc(m.name)}</button>`).join('');
+  const on = $('#months [aria-pressed="true"]');
+  if (on) on.scrollIntoView({block:'nearest', inline:'center'});
 }
 
 function renderRota(){
@@ -762,7 +959,7 @@ function renderRota(){
   const me = currentMe(), tk = dkey(today0());
 
   const colCls = col => [col.date.getDay() % 6 === 0 ? 'we' : '', dkey(col.date) === tk ? 'tcol' : '', col.spill ? 'other-m' : ''].join(' ');
-  let h = `<table class="rota"><thead><tr><th class="name">${esc(m.name)} ${m.year}</th>`;
+  let h = `<table class="rota"><thead><tr><th class="name">${esc(m.name.slice(0, 3))} ${m.year}</th>`;
   h += m.cols.map(col => `<th class="${colCls(col)}" ${dkey(col.date) === tk ? 'id="todayCol"' : ''}><span class="dw">${DOW[col.date.getDay()]}</span><span class="dd">${col.date.getDate()}</span></th>`).join('');
   h += `</tr></thead><tbody>`;
   for (const t of m.teams){
@@ -772,10 +969,10 @@ function renderRota(){
     if (!t.staff.length && !t.notes.some(n => n.length)) continue;
     h += `<tr class="team"><td class="name">${esc(t.name)}</td><td colspan="${m.cols.length}"></td></tr>`;
     if (!nameQ && t.notes.some(n => n.length)){
-      h += `<tr class="notes"><td class="name">Notes</td>` + t.notes.map((n, i) => `<td class="${colCls(m.cols[i])}">${esc(n.join(' · '))}</td>`).join('') + `</tr>`;
+      h += `<tr class="notes"><td class="name muted">Notes</td>` + t.notes.map((n, i) => `<td class="${colCls(m.cols[i])}">${esc(n.join(' · '))}</td>`).join('') + `</tr>`;
     }
     for (const s of staff){
-      h += `<tr class="staff${s.name === me ? ' me' : ''}"><td class="name"><button data-staff="${esc(s.name)}" title="See ${esc(s.name)}'s shifts">${esc(s.name)}</button>${s.hours && s.hours !== '0' ? `<small>${esc(s.hours)} hrs</small>` : ''}</td>`;
+      h += `<tr class="staff${s.name === me ? ' me' : ''}"><td class="name"><button data-staff="${esc(s.name)}" title="See ${esc(s.name)}’s shifts">${esc(s.name)}</button>${s.hours && s.hours !== '0' ? `<small>${esc(s.hours)} hrs</small>` : ''}</td>`;
       h += s.cells.map((v, i) => {
         const n = noteFor(m.cols[i].date, s.name);
         return `<td class="${colCls(m.cols[i])} shift${n ? ' has-note' : ''}" data-i="${i}" data-staff-cell="${esc(s.name)}"${n ? ` title="${esc(n.text)}"` : ''}>${chip(v)}</td>`;
@@ -788,21 +985,21 @@ function renderRota(){
 }
 
 function scrollToToday(){
-  const c = document.getElementById('todayCol'), w = $('#tableWrap');
-  if (c && w) w.scrollLeft = Math.max(0, c.offsetLeft - 140 - 66 * 2);
+  const c = document.getElementById('todayCol'), w = $('#tableWrap'), nameCol = $('.rota thead th.name');
+  if (c && w && nameCol) w.scrollLeft = Math.max(0, c.offsetLeft - nameCol.offsetWidth - c.offsetWidth * 2);
 }
 
 /* ---------- Events ---------- */
-document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => setView(b.dataset.view));
+document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
 $('#refresh').onclick = load;
 $('#staffSelect').onchange = e => { store.set('rota.me', e.target.value); renderMe(); };
 $('#copyLink').onclick = async () => {
   const me = currentMe();
   if (!me){ $('#staffSelect').focus(); return; }
   const url = location.origin + location.pathname + '?me=' + encodeURIComponent(me);
-  try { await navigator.clipboard.writeText(url); $('#copyLink').textContent = '✓ Copied'; }
+  try { await navigator.clipboard.writeText(url); $('#copyLink').textContent = 'Copied'; }
   catch { prompt('Your personal link:', url); }
-  setTimeout(() => $('#copyLink').textContent = '🔗 My link', 1800);
+  setTimeout(() => $('#copyLink').textContent = $('#copyLink').dataset.label, 1800);
 };
 $('#months').onclick = e => { const b = e.target.closest('button'); if (!b) return; rotaMonth = +b.dataset.i; renderRota(); scrollToToday(); };
 $('#teamFilter').onchange = renderRota;
@@ -889,8 +1086,36 @@ async function keyFromPasscode(pass){
 function showLock(msg){
   document.body.classList.add('locked');
   $('#lockMsg').textContent = msg || '';
-  setTimeout(() => $('#passcode').focus(), 50);
+  $('#passcode').value = '';
+  drawDots();
 }
+
+// iPhone-style keypad. It unlocks as soon as PASSCODE_LENGTH digits are in; Enter also submits.
+let checking = false;
+function drawDots(){
+  const n = $('#passcode').value.length, total = Math.max(PASSCODE_LENGTH, n);
+  $('#dots').innerHTML = Array.from({length: total}, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
+}
+function typeKey(k){
+  if (checking) return;
+  const inp = $('#passcode');
+  if (k === 'del') inp.value = inp.value.slice(0, -1);
+  else if (inp.value.length < 12) inp.value += k;
+  $('#lockMsg').textContent = '';
+  drawDots();
+  if (k !== 'del' && inp.value.length === PASSCODE_LENGTH) $('#lockForm').requestSubmit();
+}
+$('#keypad').onclick = e => { const b = e.target.closest('[data-k]'); if (b) typeKey(b.dataset.k); };
+document.addEventListener('keydown', e => {
+  if (!document.body.classList.contains('locked') || e.ctrlKey || e.metaKey || e.altKey) return;
+  const key = /^\d$/.test(e.key) ? e.key : e.key === 'Backspace' ? 'del' : null;
+  if (key){
+    e.preventDefault();
+    const b = $(`#keypad [data-k="${key}"]`);
+    if (b){ b.classList.add('press'); setTimeout(() => b.classList.remove('press'), 120); }
+    typeKey(key);
+  } else if (e.key === 'Enter'){ e.preventDefault(); $('#lockForm').requestSubmit(); }
+});
 
 let started = false;
 function start(){
@@ -908,9 +1133,9 @@ function start(){
 
 $('#lockForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const btn = $('#unlockBtn'), pass = $('#passcode').value;
-  if (!pass || !LOCK) return;
-  btn.disabled = true; btn.textContent = 'Checking…'; $('#lockMsg').textContent = '';
+  const pass = $('#passcode').value;
+  if (!pass || !LOCK || checking) return;
+  checking = true; $('#lockMsg').textContent = '';
   try {
     const raw = await keyFromPasscode(pass);
     applySecret(await openWithKey(raw));
@@ -918,10 +1143,11 @@ $('#lockForm').addEventListener('submit', async e => {
     $('#passcode').value = '';
     start();
   } catch {
-    showLock('That passcode isn’t right. Check with your manager.');
-    $('#passcode').select();
+    const dots = $('#dots');
+    dots.classList.remove('shake'); void dots.offsetWidth; dots.classList.add('shake');
+    showLock('Wrong passcode. Try again.');
   } finally {
-    btn.disabled = false; btn.textContent = 'Unlock';
+    checking = false;
   }
 });
 $('#lockBtn').onclick = () => {
