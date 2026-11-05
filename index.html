@@ -188,6 +188,7 @@
   .shift-note{display:flex;gap:6px;align-items:baseline;font-size:14px;color:var(--text);margin-top:4px;white-space:normal}
   .shift-note::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--dot);transform:translateY(-1px)}
   .foot{font-size:13px;color:var(--muted);margin:12px 4px 0}
+  .foot a{color:var(--accent);font-weight:600;text-decoration:none}
   .foot:empty{display:none}
   .cal-add{margin-top:12px}
   .cal-add .row{min-height:60px}
@@ -969,23 +970,40 @@ function calendarFile(name){
   return {ics: lines.join('\r\n'), count, file: `shifts-${slug(name)}.ics`};
 }
 
-function addToCalendar(){
+function downloadFile(ics, file){
+  const url = URL.createObjectURL(new Blob([ics], {type: 'text/calendar;charset=utf-8'}));
+  const a = Object.assign(document.createElement('a'), {href: url, download: file});
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+// The service worker (sw.js) serves files stored under …/calendar/ at a real address
+const CAL_CACHE = 'rota-calendar';
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+async function addToCalendar(){
   const name = currentMe(), msg = $('#calMsg');
   if (!name) return;
   const {ics, count, file} = calendarFile(name);
   if (!count){ msg.textContent = 'There are no upcoming shifts to add.'; return; }
   const apple = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (apple){
-    // iPhone and iPad open a calendar file straight into Calendar, with an "Add All" button
-    location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
-    msg.textContent = `Tap “Add All” to put ${count} shifts in Calendar.`;
-  } else {
-    const url = URL.createObjectURL(new Blob([ics], {type: 'text/calendar;charset=utf-8'}));
-    const a = Object.assign(document.createElement('a'), {href: url, download: file});
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  if (!apple){
+    downloadFile(ics, file);
     msg.textContent = `Downloaded ${count} shifts. Open the file to add them to Apple Calendar or Outlook. For Google Calendar on a computer: Settings → Import & export → Import.`;
+    return;
   }
+  // iPhone and iPad: Safari offers "Add All" only for a calendar file loaded from a real address
+  if (window.caches && navigator.serviceWorker && navigator.serviceWorker.controller){
+    const path = new URL('calendar/' + file, location.href).pathname;
+    const cache = await caches.open(CAL_CACHE);
+    await cache.put(path, new Response(ics, {headers: {'Content-Type': 'text/calendar; charset=utf-8'}}));
+    msg.innerHTML = `Tap “Add All” to put ${count} shifts in Calendar. Nothing opened? <a href="#" id="calDownload">Download the file</a>.`;
+    location.href = path;
+  } else {
+    msg.innerHTML = `Tap <b>Download</b> when Safari asks, then open the file from the Downloads arrow to add ${count} shifts. <a href="#" id="calDownload">Download again</a>.`;
+    downloadFile(ics, file);
+  }
+  $('#calDownload').onclick = e => { e.preventDefault(); downloadFile(ics, file); };
 }
 
 /* ----- Who's in ----- */
