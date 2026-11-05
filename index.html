@@ -201,28 +201,15 @@
   /* ---------- Who's in ---------- */
   .day-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-2px 0 4px}
   .day-nav .date-field{height:36px;border:0;border-radius:var(--r-sm);background:var(--fill);padding:0 10px;font-size:15px}
-  .day-sum{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;margin-top:14px}
-  .day-sum div{background:var(--surface);border-radius:var(--r);padding:10px 12px;box-shadow:var(--shadow)}
-  .day-sum div[class]{background:color-mix(in srgb,var(--c) 12%,var(--surface))}
-  .day-sum b{display:block;font-size:24px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
-  .day-sum div[class] b{color:var(--t)}
-  .day-sum span{font-size:13px;color:var(--muted)}
-  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start;margin-top:14px}
-  .team-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px 10px}
-  .team-h h3{margin:0;font-size:17px;font-weight:600;letter-spacing:-.02em}
-  .count{font-size:13px;font-weight:600;color:var(--muted);background:var(--fill);border-radius:999px;padding:3px 10px;white-space:nowrap}
-  .tnote{margin:0 12px 10px;padding:8px 12px;border-radius:var(--r-sm);background:var(--fill);font-size:14px;color:var(--muted)}
-  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px;padding:0 12px 12px}
-  .tile{border-radius:var(--r);padding:10px 12px 11px;background:color-mix(in srgb,var(--c) 9%,var(--surface));
-    box-shadow:inset 3px 0 0 var(--c);cursor:pointer;transition:transform .12s ease, background-color .15s ease}
-  .tile:hover{background:color-mix(in srgb,var(--c) 14%,var(--surface))}
-  .tile:active{transform:scale(.98)}
-  .tile-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
-  .tile-top b{font-weight:600;font-size:16px;letter-spacing:-.015em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .tile-top .chip{height:22px;font-size:12px;padding:0 7px}
-  .tile-sub{font-size:13px;color:var(--t);margin-top:3px;font-weight:500}
-  .tile-extra{font-size:13px;color:var(--muted);margin-top:1px}
-  .tile .shift-note{font-size:13px;margin-top:5px}
+  .day-count{margin:12px 4px 0;color:var(--muted);font-size:15px}
+  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:0 18px;align-items:start}
+  .team-card{margin-bottom:4px}
+  .tnote{margin:10px 16px 2px;font-size:14px;color:var(--muted)}
+  .person{min-height:50px}
+  .person .who{flex:1;min-width:0}
+  .person .who b{font-weight:500}
+  .person .who .shift-note{font-size:13px;color:var(--muted);margin-top:1px}
+  .role-text{font-size:14px;color:var(--muted);white-space:nowrap}
   .away-line{display:flex;flex-wrap:wrap;gap:4px 14px;padding:10px 16px 13px;border-top:.5px solid var(--sep);font-size:14px;color:var(--muted)}
   .away-line span{cursor:pointer}
   .away-line em{font-style:normal;color:var(--faint)}
@@ -346,8 +333,6 @@
     .stat{padding:12px}
     .stat .n{font-size:21px}
     .teams{grid-template-columns:1fr}
-    .day-sum b{font-size:20px}
-    .tiles{grid-template-columns:1fr 1fr}
     #view-rota{padding-top:8px}
     .rota-bar{gap:8px}
     .rota-bar .months{flex-basis:100%}
@@ -1007,13 +992,11 @@ async function addToCalendar(){
 }
 
 /* ----- Who's in ----- */
-function shiftTile(e){
-  const n = noteFor(dayDate, e.name), k = kind(e.value);
-  return `<div class="tile k-${k} tap" data-note-name="${esc(e.name)}" data-note-value="${esc(e.value)}"${n ? ` title="${esc(n.text)}"` : ''}>
-    <div class="tile-top"><b>${esc(e.name)}</b>${chip(e.value)}</div>
-    <div class="tile-sub">${esc(roleFor(e.team, e.value))}</div>
-    ${/^(time|work)$/.test(k) || describe(e.value).includes('·') ? `<div class="tile-extra">${esc(describe(e.value))}</div>` : ''}
-    ${n ? `<div class="shift-note">${esc(n.text)}</div>` : ''}</div>`;
+function personRow(e){
+  const n = noteFor(dayDate, e.name);
+  return `<div class="row tap person" data-note-name="${esc(e.name)}" data-note-value="${esc(e.value)}"${n ? ` title="${esc(n.text)}"` : ''}>
+    <div class="who"><b>${esc(e.name)}</b>${n ? `<div class="shift-note">${esc(n.text)}</div>` : ''}</div>
+    <span class="role-text">${esc(roleFor(e.team, e.value))}</span>${chip(e.value)}</div>`;
 }
 function renderDay(){
   const k = dkey(dayDate), isT = k === dkey(today0());
@@ -1035,27 +1018,21 @@ function renderDay(){
   }
   const notes = teamNotes.get(k) || [];
   const order = {early:0, time:1, in:2, work:3, late:4};
-  const tally = {early:0, in:0, late:0, other:0};
-  let cards = '';
+  let cards = '', total = 0;
   for (const [t, list] of teams){
     const work = list.filter(e => isWork(kind(e.value)));
     const away = list.filter(e => e.value && !isWork(kind(e.value)));
     const tn = notes.filter(n => n.team === t);
     if (!work.length && !away.length && !tn.length) continue;
     work.sort((a,b) => order[kind(a.value)] - order[kind(b.value)]);
-    for (const e of work){ const kk = kind(e.value); tally[kk in tally ? kk : 'other']++; }
-    cards += `<div class="group team-card"><div class="team-h"><h3>${esc(t)}</h3><span class="count">${work.length} on shift</span></div>
+    total += work.length;
+    cards += `<div><div class="section-h"><span>${esc(t)}</span><span>${work.length}</span></div>
+      <div class="group team-card">
       ${tn.map(n => `<div class="tnote">${esc(n.note)}</div>`).join('')}
-      ${work.length ? `<div class="tiles">${work.map(shiftTile).join('')}</div>` : ''}
-      ${away.length ? `<div class="away-line">${away.map(e => `<span class="tap" data-note-name="${esc(e.name)}" data-note-value="${esc(e.value)}">${esc(e.name)} <em>${esc(describe(e.value))}</em></span>`).join('')}</div>` : ''}</div>`;
+      ${work.length ? `<div class="rows">${work.map(personRow).join('')}</div>` : ''}
+      ${away.length ? `<div class="away-line">${away.map(e => `<span class="tap" data-note-name="${esc(e.name)}" data-note-value="${esc(e.value)}">${esc(e.name)} <em>${esc(describe(e.value))}</em></span>`).join('')}</div>` : ''}</div></div>`;
   }
-  const total = tally.early + tally.in + tally.late + tally.other;
-  const summary = `<div class="day-sum">
-    <div><b>${total}</b><span>Total</span></div>
-    <div class="k-early"><b>${tally.early}</b><span>Early</span></div>
-    <div class="k-in"><b>${tally.in}</b><span>In</span></div>
-    <div class="k-late"><b>${tally.late}</b><span>Late</span></div>
-    ${tally.other ? `<div class="k-time"><b>${tally.other}</b><span>Other</span></div>` : ''}</div>`;
+  const summary = `<p class="day-count">${total} ${total === 1 ? 'person' : 'people'} on shift</p>`;
   $('#dayBody').innerHTML = total || notes.length ? summary + `<div class="teams">${cards}</div>` : `<div class="group empty" style="margin-top:12px">Nobody is rostered on this day.</div>`;
 }
 
