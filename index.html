@@ -66,6 +66,7 @@
 
   *{box-sizing:border-box}
   html,body{margin:0}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   body{background:var(--bg);color:var(--text);font:400 16px/1.4 var(--font);letter-spacing:-.011em;
     -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;font-variant-numeric:tabular-nums}
   button,select,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
@@ -187,6 +188,14 @@
   .shift-note{display:flex;gap:6px;align-items:baseline;font-size:14px;color:var(--text);margin-top:4px;white-space:normal}
   .shift-note::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--dot);transform:translateY(-1px)}
   .foot{font-size:13px;color:var(--muted);margin:12px 4px 0}
+  .foot:empty{display:none}
+  .cal-add{margin-top:12px}
+  .cal-add .row{min-height:60px}
+  .cal-add .body{flex:1;min-width:0}
+  .cal-add b{font-weight:600;color:var(--accent)}
+  .cal-add .muted{font-size:14px;margin-top:1px}
+  .cal-ico{width:36px;height:36px;flex:none;border-radius:9px;display:grid;place-items:center;color:#fff;background:linear-gradient(180deg,#1fb320,#3e7d34)}
+  .cal-ico svg{width:21px;height:21px}
 
   /* ---------- Who's in ---------- */
   .day-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-2px 0 4px}
@@ -298,15 +307,17 @@
   .err{color:var(--red);font-size:14px;min-height:1em;margin:0}
 
   /* ---------- passcode screen ---------- */
-  #lock{display:none;min-height:100vh;min-height:100dvh;place-items:center;padding:calc(24px + env(safe-area-inset-top,0px)) 16px 24px}
+  #lock{display:none;min-height:100vh;min-height:100dvh;place-items:center;grid-template-columns:minmax(0,1fr);
+    padding:calc(24px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
   body.locked #lock{display:grid}
   body.locked header,body.locked main,body.locked .tabbar{display:none!important}
-  .lock-card{width:100%;max-width:380px;display:grid;gap:12px;justify-items:stretch;text-align:center;padding:32px 24px 26px;
+  /* every child is held to the card's width, so Safari's own text-box sizing can't push past the screen */
+  .lock-card{width:100%;max-width:380px;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;justify-items:stretch;text-align:center;padding:32px 24px 26px;
     background:var(--surface);border-radius:24px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 18px 50px rgba(0,0,0,.08)}
   .lock-icon{width:68px;height:68px;border-radius:15px;justify-self:center;box-shadow:0 8px 22px rgba(62,125,52,.3)}
   .lock-card h2{font-size:24px;font-weight:700;letter-spacing:-.025em;margin:8px 0 0}
   .lock-card p{margin:0}
-  .lock-card input{height:52px;border:0;border-radius:14px;background:var(--fill);padding:0 16px;font-size:20px;text-align:center;letter-spacing:.3em;margin-top:8px;
+  .lock-card input{width:100%;min-width:0;max-width:100%;height:52px;border:0;border-radius:14px;background:var(--fill);padding:0 16px;font-size:20px;text-align:center;letter-spacing:.3em;margin-top:8px;
     transition:box-shadow .15s ease}
   .lock-card input::placeholder{letter-spacing:normal;font-size:17px;color:var(--muted)}
   .lock-card input:focus{outline:none;box-shadow:0 0 0 3px var(--accent-soft),inset 0 0 0 1px var(--accent)}
@@ -862,6 +873,10 @@ function renderMe(){
     <div class="stat"><div class="n">${in7}</div><div class="t">Next 7 days</div></div>
     <div class="stat"><div class="n">${working.length}</div><div class="t">Shifts to come</div></div>
     <div class="stat"><div class="n">${leave}</div><div class="t">Leave days</div></div></div>`;
+  if (working.length) html += `<div class="group cal-add"><div class="row tap" id="addCal" role="button" tabindex="0">
+      <span class="cal-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></span>
+      <div class="body"><b>Add shifts to my calendar</b><div class="muted">${working.length} shift${working.length > 1 ? 's' : ''} · Apple, Google or Outlook</div></div>${chevron}</div></div>
+    <p class="foot" id="calMsg"></p>`;
 
   // group by week (Mon start)
   const weeks = new Map();
@@ -902,6 +917,75 @@ function renderMe(){
   html += `<p class="foot">The rota runs to ${esc(rotaEnd().toLocaleDateString(undefined, {day:'numeric', month:'long'}))}.</p>`;
   body.innerHTML = html;
   $('#showRest').onchange = e => { store.set('rota.showRest', e.target.checked ? '1' : '0'); renderMe(); };
+}
+
+/* ----- Add shifts to a calendar ----- */
+// Usual times when the sheet only says E or L. A time written in the shift ("18-23", "E-12:30") wins.
+const SHIFT_TIMES = {early: ['06:00', '14:30'], late: ['13:30', '22:00']};
+const toMins = hm => { const [h, m] = hm.split(':').map(Number); return h * 60 + m; };
+
+function shiftTimes(value){
+  const t = clean(value), dflt = SHIFT_TIMES[kind(value)];
+  const range = t.match(/(\d{1,2})(?:[:.](\d{2}))?\s*-\s*(\d{1,2})(?:[:.](\d{2}))?/);
+  if (range && !/^[A-Z]+\s*-/i.test(t)){
+    const start = +range[1] * 60 + +(range[2] || 0);
+    let end = +range[3] * 60 + +(range[4] || 0);
+    if (end <= start && +range[3] < 12) end += 12 * 60;   // "9-4" means 9am to 4pm
+    if (end > start && end <= 24 * 60) return [start, end];
+  }
+  const endOnly = t.match(/^[A-Z]+\s*-\s*(\d{1,2})(?:[:.](\d{2}))?/i);   // "E-12:30": usual start, early finish
+  if (endOnly && dflt) return [toMins(dflt[0]), +endOnly[1] * 60 + +(endOnly[2] || 0)];
+  return dflt ? dflt.map(toMins) : null;   // no time known: an all-day event
+}
+
+function calendarFile(name){
+  const t0 = today0();
+  const span = Math.max(0, Math.round((rotaEnd() - t0) / 864e5) + 1);
+  const pad = n => String(n).padStart(2, '0');
+  const ymd = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+  const at = (d, mins) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, mins); return `${ymd(x)}T${pad(x.getHours())}${pad(x.getMinutes())}00`; };
+  const text = v => String(v).replace(/[\\;,]/g, c => '\\' + c).replace(/\n/g, '\\n');   // calendar-file escaping
+  const slug = v => v.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Club Rota//Shifts//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Work shifts'];
+  let count = 0;
+  for (const x of shiftsFor(name, t0, span)){
+    for (const sh of x.shifts || []){
+      if (!isWork(kind(sh.value))) continue;
+      const times = shiftTimes(sh.value);
+      // the same ID every time, so adding again updates a shift instead of copying it
+      lines.push('BEGIN:VEVENT',
+        `UID:${ymd(x.d)}-${slug(name)}-${slug(sh.role)}@whenimin.github.io`,
+        `DTSTAMP:${stamp}`,
+        times ? `DTSTART:${at(x.d, times[0])}` : `DTSTART;VALUE=DATE:${ymd(x.d)}`,
+        times ? `DTEND:${at(x.d, times[1])}` : `DTEND;VALUE=DATE:${ymd(addDays(x.d, 1))}`,
+        `SUMMARY:${text(`${sh.role} – ${describe(sh.value)}`)}`,
+        `DESCRIPTION:${text(`Rota code: ${clean(sh.value)}\nFrom Club Rota (whenimin.github.io)`)}`,
+        'END:VEVENT');
+      count++;
+    }
+  }
+  lines.push('END:VCALENDAR');
+  return {ics: lines.join('\r\n'), count, file: `shifts-${slug(name)}.ics`};
+}
+
+function addToCalendar(){
+  const name = currentMe(), msg = $('#calMsg');
+  if (!name) return;
+  const {ics, count, file} = calendarFile(name);
+  if (!count){ msg.textContent = 'There are no upcoming shifts to add.'; return; }
+  const apple = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (apple){
+    // iPhone and iPad open a calendar file straight into Calendar, with an "Add All" button
+    location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+    msg.textContent = `Tap “Add All” to put ${count} shifts in Calendar.`;
+  } else {
+    const url = URL.createObjectURL(new Blob([ics], {type: 'text/calendar;charset=utf-8'}));
+    const a = Object.assign(document.createElement('a'), {href: url, download: file});
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    msg.textContent = `Downloaded ${count} shifts. Open the file to add them to Apple Calendar or Outlook. For Google Calendar on a computer: Settings → Import & export → Import.`;
+  }
 }
 
 /* ----- Who's in ----- */
@@ -1064,6 +1148,7 @@ $('#tableWrap').onclick = e => {
   const b = e.target.closest('[data-staff]'); if (!b) return; store.set('rota.me', b.dataset.staff); setView('me'); window.scrollTo(0,0);
 };
 $('#meBody').addEventListener('click', e => {
+  if (e.target.closest('#addCal')) return addToCalendar();
   const row = e.target.closest('[data-note-date]'); if (!row) return;
   openNote(fromKey(row.dataset.noteDate), row.dataset.noteName, row.dataset.noteValue);
 });
