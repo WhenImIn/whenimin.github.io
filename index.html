@@ -72,6 +72,9 @@
   button,select,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
   button{cursor:pointer}
   .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  /* the rota grid uses the whole width of big screens; the other tabs keep a reading width */
+  body[data-view="rota"] .wrap{max-width:none}
+  @media (min-width:1300px){ body[data-view="rota"] .wrap{padding-left:28px;padding-right:28px} }
   .hidden{display:none!important}
   .spacer{flex:1}
   .muted{color:var(--muted)}
@@ -758,6 +761,7 @@ let dayDate = today0();
 
 function setView(v){
   view = v;
+  document.body.dataset.view = v;
   document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-selected', b.dataset.view === v));
   ['me','day','rota'].forEach(x => $('#view-'+x).classList.toggle('hidden', x !== v));
   store.set('rota.view', v);
