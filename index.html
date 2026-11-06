@@ -272,7 +272,7 @@
     padding:env(safe-area-inset-top,0px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));box-sizing:content-box;
     background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--sep)}
   body.fs .fs-bar b{font-size:17px;font-weight:600;min-width:130px;text-align:center;letter-spacing:-.02em}
-  body.fs .table-wrap{position:fixed;z-index:59;left:0;right:0;bottom:0;top:calc(54px + env(safe-area-inset-top,0px));max-height:none;border-radius:0}
+  body.fs .table-wrap{position:fixed;z-index:59;left:0;right:0;bottom:0;top:calc(54px + env(safe-area-inset-top,0px));height:auto!important;min-height:0;max-height:none;border-radius:0}
 
   /* ---------- note sheet ---------- */
   #noteDlg{border:0;padding:0;border-radius:14px;background:var(--surface);color:var(--text);width:min(440px,calc(100vw - 24px));
