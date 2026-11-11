@@ -182,12 +182,19 @@
   .day.is-today .dn b{background:var(--red);color:#fff}
   .day .body{flex:1;min-width:0}
   .day .desc{font-size:14px;color:var(--muted);margin-top:2px}
-  .day .shiftline{display:flex;align-items:center;gap:8px}
+  .day .shiftline{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-width:0}
+  .day .shiftline .chip{max-width:100%;overflow:hidden;text-overflow:ellipsis}
   .day .shiftline + .desc + .shiftline,.day .desc + .shiftline{margin-top:8px}
   .role{font-size:15px;font-weight:600;letter-spacing:-.015em}
   .day .note{font-size:14px;color:var(--muted);margin-top:3px}
   .day.rest .dn b,.day.rest .body{opacity:.55}
   .rel{font-size:14px;color:var(--muted);white-space:nowrap}
+  .note-btn{flex:none;width:32px;height:32px;border:0;border-radius:50%;background:var(--fill);color:var(--muted);display:grid;place-items:center;
+    transition:transform .12s ease, background-color .15s ease}
+  .note-btn svg{width:16px;height:16px}
+  .note-btn:hover{background:var(--fill-2);color:var(--text)}
+  .note-btn:active{transform:scale(.92)}
+  .note-btn.has{background:color-mix(in srgb,var(--dot) 18%,transparent);color:var(--t-late)}
   .shift-note{display:flex;gap:6px;align-items:baseline;font-size:14px;color:var(--text);margin-top:4px;white-space:normal}
   .shift-note::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--dot);transform:translateY(-1px)}
   .foot{font-size:13px;color:var(--muted);margin:12px 4px 0}
@@ -211,6 +218,9 @@
   .person{min-height:50px}
   .person .who{flex:1;min-width:0}
   .person .who b{font-weight:500}
+  .person.is-me{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+  .person.is-me .who b{color:var(--accent);font-weight:600}
+  .you{margin-left:8px;font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:1px 8px}
   .person .who .shift-note{font-size:13px;color:var(--muted);margin-top:1px}
   .role-text{font-size:14px;color:var(--muted);white-space:nowrap}
   .away-line{display:flex;flex-wrap:wrap;gap:4px 14px;padding:10px 16px 13px;border-top:.5px solid var(--sep);font-size:14px;color:var(--muted)}
@@ -824,6 +834,7 @@ function rotaEnd(){
 }
 
 const chevron = '<svg class="chev" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5l5 5-5 5"/></svg>';
+const pencil = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
 const longDate = d => d.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long'});
 
 function renderMe(){
@@ -894,13 +905,14 @@ function renderMe(){
     for (const x of list){
       const isT = dkey(x.d) === dkey(t0);
       const sn = noteFor(x.d, s.name);
-      html += `<div class="row tap day ${isT ? 'is-today' : ''} ${isWorkDay(x) ? '' : 'rest'}" data-note-date="${dkey(x.d)}" data-note-name="${esc(s.name)}" data-note-value="${esc(x.values[0] || '')}" title="${sn ? esc(sn.text) : 'Tap to add a note'}">
+      html += `<div class="row tap day ${isT ? 'is-today' : ''} ${isWorkDay(x) ? '' : 'rest'}" data-note-date="${dkey(x.d)}" data-note-name="${esc(s.name)}" data-note-value="${esc(x.values[0] || '')}" title="See who’s in that day">
         <div class="dn"><span>${DOW[x.d.getDay()]}</span><b>${x.d.getDate()}</b></div>
         <div class="body">${x.shifts.length ? x.shifts.map(sh => `<div class="shiftline">${chip(sh.value)}<span class="role">${esc(isWork(kind(sh.value)) ? sh.role : describe(sh.value))}</span></div>
             ${isWork(kind(sh.value)) ? `<div class="desc">${esc(describe(sh.value))}</div>` : ''}`).join('') : '<span class="muted">Not rostered</span>'}
           ${x.notes && x.notes.length ? `<div class="note">${esc(x.notes.join(' · '))}</div>` : ''}
           ${sn ? `<div class="shift-note">${esc(sn.text)}</div>` : ''}</div>
-        <span class="rel">${relLabel(x.d)}</span>${chevron}</div>`;
+        <span class="rel">${relLabel(x.d)}</span>
+        <button type="button" class="note-btn${sn ? ' has' : ''}" data-note-btn aria-label="${sn ? 'Edit note' : 'Add note'}" title="${sn ? 'Edit note' : 'Add note'}">${pencil}</button>${chevron}</div>`;
     }
     html += `</div>`;
   }
@@ -998,8 +1010,9 @@ async function addToCalendar(){
 /* ----- Who's in ----- */
 function personRow(e){
   const n = noteFor(dayDate, e.name);
-  return `<div class="row tap person" data-note-name="${esc(e.name)}" data-note-value="${esc(e.value)}"${n ? ` title="${esc(n.text)}"` : ''}>
-    <div class="who"><b>${esc(e.name)}</b>${n ? `<div class="shift-note">${esc(n.text)}</div>` : ''}</div>
+  const me = e.name === currentMe();
+  return `<div class="row tap person${me ? ' is-me' : ''}" data-note-name="${esc(e.name)}" data-note-value="${esc(e.value)}"${n ? ` title="${esc(n.text)}"` : ''}>
+    <div class="who"><b>${esc(e.name)}</b>${me ? '<span class="you">You</span>' : ''}${n ? `<div class="shift-note">${esc(n.text)}</div>` : ''}</div>
     <span class="role-text">${esc(roleFor(e.team, e.value))}</span>${chip(e.value)}</div>`;
 }
 function renderDay(){
@@ -1151,7 +1164,11 @@ $('#tableWrap').onclick = e => {
 $('#meBody').addEventListener('click', e => {
   if (e.target.closest('#addCal')) return addToCalendar();
   const row = e.target.closest('[data-note-date]'); if (!row) return;
-  openNote(fromKey(row.dataset.noteDate), row.dataset.noteName, row.dataset.noteValue);
+  // the pencil writes a note; anywhere else on a shift shows who's working that day
+  if (e.target.closest('[data-note-btn]')) return openNote(fromKey(row.dataset.noteDate), row.dataset.noteName, row.dataset.noteValue);
+  dayDate = fromKey(row.dataset.noteDate);
+  setView('day');
+  window.scrollTo(0, 0);
 });
 $('#dayBody').addEventListener('click', e => {
   const row = e.target.closest('[data-note-name]'); if (!row) return;
